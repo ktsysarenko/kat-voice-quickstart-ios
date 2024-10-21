@@ -188,7 +188,9 @@ class ViewController: UIViewController {
     }
     
     @IBAction func muteSwitchToggled(_ sender: UISwitch) {
-        guard let activeCall = getActiveCall() else { return }
+        guard let activeCall = getActiveCall(), let uuid = activeCall.uuid else { return }
+
+        performMuteCallAction(uuid: uuid, isMuted: sender.isOn)
 
         activeCall.isMuted = sender.isOn
     }
@@ -509,7 +511,7 @@ extension ViewController: CallDelegate {
             toggleUIState(isEnabled: true, showCallControl: false)
             placeCallButton.setTitle("Call", for: .normal)
         } else {
-            guard let activeCall = getActiveCall() else { return }
+            guard getActiveCall() != nil else { return }
             toggleUIState(isEnabled: true, showCallControl: true)
         }
     }
@@ -787,7 +789,26 @@ extension ViewController: CXProviderDelegate {
             }
         }
     }
-    
+
+    func performMuteCallAction(uuid: UUID, isMuted: Bool) {
+        guard let provider = callKitProvider else {
+            NSLog("CallKit provider not available")
+            return
+        }
+
+        let muteCallAction = CXSetMutedCallAction(call: uuid, muted: isMuted)
+        let transaction = CXTransaction(action: muteCallAction)
+
+        callKitCallController.request(transaction) { error in
+            if let error = error {
+                NSLog("CXSetMutedCallAction transaction request failed: \(error.localizedDescription)")
+                return
+            }
+
+            NSLog("CXSetMutedCallAction transaction request successful")
+        }
+    }
+
     func performVoiceCall(uuid: UUID, client: String?, completionHandler: @escaping (Bool) -> Void) {
         let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
             builder.params = [twimlParamTo: self.outgoingValue.text ?? ""]
