@@ -6,3 +6,4 @@ Cartfile.resolved
 
 xcuserdata/
 *.xcuserstate
+.DS_Store
