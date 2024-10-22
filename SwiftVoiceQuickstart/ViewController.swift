@@ -75,7 +75,7 @@ class ViewController: UIViewController {
         outgoingValue.delegate = self
         
         /* Please note that the designated initializer `CXProviderConfiguration(localizedName: String)` has been deprecated on iOS 14. */
-        let configuration = CXProviderConfiguration(localizedName: "Voice Quickstart")
+        let configuration = CXProviderConfiguration()
         configuration.maximumCallGroups = 2
         configuration.maximumCallsPerCallGroup = 1
         callKitProvider = CXProvider(configuration: configuration)
@@ -104,7 +104,7 @@ class ViewController: UIViewController {
             callControlView.isHidden = false
             muteSwitch.isOn = getActiveCall()?.isMuted ?? false
             for output in AVAudioSession.sharedInstance().currentRoute.outputs {
-                speakerSwitch.isOn = output.portType == AVAudioSessionPortBuiltInSpeaker
+                speakerSwitch.isOn = output.portType == .builtInSpeaker
             }
         } else {
             callControlView.isHidden = true
@@ -121,8 +121,8 @@ class ViewController: UIViewController {
         }
         
         let goToSettings = UIAlertAction(title: "Settings", style: .default) { _ in
-            UIApplication.shared.open(URL(string: UIApplicationOpenSettingsURLString)!,
-                                      options: [UIApplicationOpenURLOptionUniversalLinksOnly: false],
+            UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!,
+                                      options: [UIApplication.OpenExternalURLOptionsKey.universalLinksOnly: false],
                                       completionHandler: nil)
         }
         
@@ -169,7 +169,7 @@ class ViewController: UIViewController {
     }
     
     func checkRecordPermission(completion: @escaping (_ permissionGranted: Bool) -> Void) {
-        let permissionStatus = AVAudioSession.sharedInstance().recordPermission()
+        let permissionStatus = AVAudioSession.sharedInstance().recordPermission
         
         switch permissionStatus {
         case .granted:
@@ -226,14 +226,14 @@ class ViewController: UIViewController {
         guard !isSpinning else { return }
         
         isSpinning = true
-        spin(options: UIViewAnimationOptions.curveEaseIn)
+        spin(options: .curveEaseIn)
     }
     
     func stopSpin() {
         isSpinning = false
     }
     
-    func spin(options: UIViewAnimationOptions) {
+    func spin(options: UIView.AnimationOptions) {
         UIView.animate(withDuration: 0.5, delay: 0.0, options: options, animations: { [weak iconView] in
             if let iconView = iconView {
                 iconView.transform = iconView.transform.rotated(by: CGFloat(Double.pi/2))
@@ -243,9 +243,9 @@ class ViewController: UIViewController {
 
             if finished {
                 if strongSelf.isSpinning {
-                    strongSelf.spin(options: UIViewAnimationOptions.curveLinear)
-                } else if options != UIViewAnimationOptions.curveEaseOut {
-                    strongSelf.spin(options: UIViewAnimationOptions.curveEaseOut)
+                    strongSelf.spin(options: .curveLinear)
+                } else if options != .curveEaseOut {
+                    strongSelf.spin(options: .curveEaseOut)
                 }
             }
         }
@@ -791,7 +791,7 @@ extension ViewController: CXProviderDelegate {
     }
 
     func performMuteCallAction(uuid: UUID, isMuted: Bool) {
-        guard let provider = callKitProvider else {
+        guard callKitProvider != nil else {
             NSLog("CallKit provider not available")
             return
         }
