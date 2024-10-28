@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PKPushRegistryDelegate {
     var pushKitEventDelegate: PushKitEventDelegate?
     var voipRegistry = PKPushRegistry.init(queue: DispatchQueue.main)
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         NSLog("Twilio Voice Version: %@", TwilioVoiceSDK.sdkVersion())
         
         let viewController = UIApplication.shared.windows.first?.rootViewController as? ViewController
